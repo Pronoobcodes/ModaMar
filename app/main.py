@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel
 
-from app.database.database import engine
+from app.core.database import engine
 
 
 @asynccontextmanager

@@ -4,19 +4,17 @@ from datetime import datetime
 import uuid
 
 
-class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
-    username: str = Field(unique=True, index=True, max_length=50)
-    phone_number: Optional[str] = Field(default=None, max_length=20)
-
-
-class User(UserBase, table=True):
+class User(SQLModel, table=True):
     __tablename__ = "users"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     is_active: bool = Field(default=True)
     is_staff: bool = Field(default=False)
+    email: str = Field(unique=True, index=True)
+    username: Optional[str] = Field(unique=True, index=True, max_length=50)
+    name: str = Field(default=None, max_length=50)
+    phone_number: Optional[str] = Field(default=None, max_length=20)
     '''
     email_verified: bool = Field(default=False)
     phone_verified: bool = Field(default=False)
@@ -40,16 +38,6 @@ class User(UserBase, table=True):
     device_tokens: List["DeviceToken"] = Relationship(back_populates="user")
     verifications: List["UserVerification"] = Relationship(back_populates="user")
     '''
-    
-
-class UserCreate(UserBase):
-    password: str
-
-
-class UserRead(UserBase):
-    id: uuid.UUID
-    # email_verified: bool
-    date_joined: datetime
 
 
 class Profile(SQLModel, table=True):
@@ -68,7 +56,6 @@ class Profile(SQLModel, table=True):
     karma_score: float = Field(default=0.0)
     total_sales: int = Field(default=0)
     total_purchases: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
 
     user: Optional[User] = Relationship(back_populates="profile")
