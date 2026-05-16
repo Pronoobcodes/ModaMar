@@ -1,5 +1,7 @@
+import uuid
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from sqlmodel import Session
 
@@ -8,11 +10,11 @@ from app.core.config import settings
 from app.models.user import User
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+bearer_scheme = HTTPBearer()
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     session: Session = Depends(get_session),
 ) -> User:
     credentials_exception = HTTPException(
@@ -21,16 +23,19 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        token = credentials.credentials
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
         if payload.get("type") != "access":
             raise credentials_exception
 
-        user_id: str | None = payload.get("sub")
-        if user_id is None:
+        user_id_str: str | None = payload.get("sub")
+        if user_id_str is None:
             raise credentials_exception
 
-    except JWTError:
+        user_id = uuid.UUID(user_id_str)
+
+    except (JWTError, ValueError):
         raise credentials_exception
 
     user = session.get(User, user_id)
