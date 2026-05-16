@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
-from datetime import datetime
 import uuid
+from datetime import datetime, timezone
+from typing import Optional
+
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class User(SQLModel, table=True):
@@ -12,16 +13,15 @@ class User(SQLModel, table=True):
     is_active: bool = Field(default=True)
     is_staff: bool = Field(default=False)
     email: str = Field(unique=True, index=True)
-    username: Optional[str] = Field(unique=True, index=True, max_length=50)
-    name: str = Field(default=None, max_length=50)
+    username: Optional[str] = Field(default=None, unique=True, index=True, max_length=50)
+    name: str = Field(max_length=50)
     phone_number: Optional[str] = Field(default=None, max_length=20)
     '''
     email_verified: bool = Field(default=False)
     phone_verified: bool = Field(default=False)
     '''
-    date_joined: datetime = Field(default_factory=datetime.utcnow)
+    date_joined: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user")
     '''
     listings: List["Item"] = Relationship(back_populates="seller")
@@ -45,8 +45,8 @@ class Profile(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", unique=True)
-    avatar_url: Optional[str] = None
-    bio: Optional[str] = None
+    avatar_url: Optional[str] = Field(default=None)
+    bio: Optional[str] = Field(default=None)
     location: Optional[str] = Field(default=None, max_length=100)
     state: Optional[str] = Field(default=None, max_length=100)
     '''
@@ -56,9 +56,10 @@ class Profile(SQLModel, table=True):
     karma_score: float = Field(default=0.0)
     total_sales: int = Field(default=0)
     total_purchases: int = Field(default=0)
-    updated_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = Field(default=None)
 
     user: Optional[User] = Relationship(back_populates="profile")
+
 
 '''    
 

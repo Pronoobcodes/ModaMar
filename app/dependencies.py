@@ -4,19 +4,29 @@ from jose import jwt, JWTError
 from sqlmodel import Session
 
 from app.core.database import get_session
-from app.core.security import SECRET_KEY, ALGORITHM
+from app.core.config import settings
 from app.models.user import User
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    session: Session = Depends(get_session),
+) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
+        if payload.get("type") != "access":
+            raise credentials_exception
+
+        user_id: str | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
 
@@ -24,8 +34,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Dep
         raise credentials_exception
 
     user = session.get(User, user_id)
-
     if not user:
         raise credentials_exception
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated",
+        )
 
     return user

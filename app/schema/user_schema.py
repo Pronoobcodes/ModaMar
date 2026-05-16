@@ -1,16 +1,17 @@
-from sqlmodel import SQLModel
-from typing import Optional
-from pydantic import EmailStr
 import uuid
 from datetime import datetime
+from typing import Optional
+
+from pydantic import EmailStr
+from sqlmodel import SQLModel
 
 
 class UserCreate(SQLModel):
     name: str
-    username: Optional[str]
-    email: str
+    email: EmailStr
     password: str
-    phone_number: Optional[str]
+    username: Optional[str] = None
+    phone_number: Optional[str] = None
 
 
 class UserLogin(SQLModel):
@@ -25,9 +26,9 @@ class TokenResponse(SQLModel):
 
 
 class UserUpdate(SQLModel):
-    name: Optional[str] 
-    username: Optional[str] 
-    phone_number: Optional[str] 
+    name: Optional[str] = None
+    username: Optional[str] = None
+    phone_number: Optional[str] = None
 
 
 class UpdatePassword(SQLModel):
@@ -39,35 +40,30 @@ class UpdatePassword(SQLModel):
 class UserResponse(SQLModel):
     id: uuid.UUID
     name: str
-    username: Optional[str]
     email: EmailStr
-    phone_number: Optional[str]
+    username: Optional[str] = None
+    phone_number: Optional[str] = None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class ProfileUpdate(SQLModel):
-    avatar_url: Optional[str]
-    bio: Optional[str] 
-    location: Optional[str] 
-    state: Optional[str] 
-    
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    state: Optional[str] = None
+
 
 class ProfileResponse(SQLModel):
-    id: Optional[int] 
-    user_id: uuid.UUID 
-    avatar_url: Optional[str] 
-    bio: Optional[str] 
-    location: Optional[str] 
-    state: Optional[str] 
-    karma_score: float 
-    total_sales: int 
-    total_purchases: int 
-    updated_at: Optional[datetime] 
+    id: Optional[int] = None
+    user_id: uuid.UUID
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    state: Optional[str] = None
+    karma_score: float
+    total_sales: int
+    total_purchases: int
+    updated_at: Optional[datetime] = None
 
-    model_config = {
-        "from_attributes": True
-    }   
-
+    model_config = {"from_attributes": True}
