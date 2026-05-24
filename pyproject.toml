@@ -12,6 +12,7 @@ dependencies = [
     "fastapi-cache2[redis]>=0.2.2",
     "fastapi[standard]>=0.136.1",
     "httpx>=0.28.1",
+    "imagekitio[aiohttp]>=5.4.0",
     "passlib[bcrypt]>=1.7.4",
     "pillow>=12.2.0",
     "pwdlib[argon2]>=0.3.0",
@@ -20,6 +21,7 @@ dependencies = [
     "python-multipart>=0.0.28",
     "redis>=4.6.0",
     "sqlmodel>=0.0.38",
+    "supabase>=2.25.1",
     "uvicorn[standard]>=0.46.0",
 ]
 

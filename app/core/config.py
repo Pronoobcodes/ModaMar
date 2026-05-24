@@ -12,6 +12,9 @@ class Settings(BaseSettings):
 
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

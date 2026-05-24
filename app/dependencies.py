@@ -1,13 +1,14 @@
 import uuid
+import math
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
-from sqlmodel import Session
 
-from app.core.database import get_session
+from app.core.database import get_supabase
 from app.core.config import settings
 from app.models.user import User
+
 
 
 bearer_scheme = HTTPBearer()
@@ -15,7 +16,6 @@ bearer_scheme = HTTPBearer()
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    session: Session = Depends(get_session),
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,9 +38,12 @@ def get_current_user(
     except (JWTError, ValueError):
         raise credentials_exception
 
-    user = session.get(User, user_id)
-    if not user:
+    supabase = get_supabase()
+    response = supabase.table("users").select("*").eq("id", str(user_id)).execute()
+    if not response.data:
         raise credentials_exception
+
+    user = User(**response.data[0])
 
     if not user.is_active:
         raise HTTPException(
@@ -49,3 +52,24 @@ def get_current_user(
         )
 
     return user
+
+
+class PaginationParams:
+    def __init__(
+        self,
+        page: int = Query(default=1, ge=1, description="Page number"),
+        size: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    ):
+        self.page = page
+        self.size = size
+        self.offset = (page - 1) * size
+        self.limit = size
+
+    def paginate_response(self, total: int, items: list) -> dict:
+        return {
+            "items": items,
+            "total": total,
+            "page": self.page,
+            "size": self.size,
+            "pages": math.ceil(total / self.size),
+        }

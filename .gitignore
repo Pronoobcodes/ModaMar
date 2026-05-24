@@ -11,3 +11,9 @@ wheels/
 
 # databases
 database.db
+
+supabase_schema.sql
+
+.env/
+.env
+.ruff_cache/

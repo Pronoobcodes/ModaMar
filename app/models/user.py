@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship
+from app.models.product import Product
 
 
 class User(SQLModel, table=True):
@@ -23,8 +24,8 @@ class User(SQLModel, table=True):
     date_joined: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     profile: Optional["Profile"] = Relationship(back_populates="user")
+    products: List[Product] = Relationship(back_populates="seller")
     '''
-    listings: List["Item"] = Relationship(back_populates="seller")
     purchases: List["Order"] = Relationship(
         back_populates="buyer",
         sa_relationship_kwargs={"foreign_keys": "[Order.buyer_id]"}

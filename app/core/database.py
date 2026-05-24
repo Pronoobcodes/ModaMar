@@ -1,18 +1,16 @@
-from sqlmodel import create_engine, Session
+"""
+Supabase database connection
+"""
+from supabase import create_client, Client
+from app.core.config import settings
 
 
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+# create supabase client
+supabase: Client = create_client(
+    settings.SUPABASE_URL,
+    settings.SUPABASE_KEY
+)
 
-connect_args = {"check_same_thread": False}
-
-engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
-
-
-def get_session():
-    with Session(engine) as session:
-        try: 
-            yield session
-        except Exception:
-            session.rollback()
-            raise
+def get_supabase() -> Client:
+    """Get supabase client"""
+    return supabase
